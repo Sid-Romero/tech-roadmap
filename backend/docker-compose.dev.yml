@@ -1,0 +1,46 @@
+# ===========================================
+# Tech Roadmap Tracker - Development Override
+# ===========================================
+# Usage: docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+# ===========================================
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    
+    environment:
+      - DEBUG=true
+    
+    volumes:
+      # Mount source code for hot reload
+      - ./app:/app/app:ro
+      - ./.env:/app/.env:ro
+    
+    # Override command for development
+    command: >
+      uvicorn app.main:app
+      --host 0.0.0.0
+      --port 8000
+      --reload
+      --reload-dir /app/app
+    
+    # No resource limits in dev
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1G
+
+  db:
+    # Expose DB port in development
+    ports:
+      - "5432:5432"
+    
+    # No resource limits in dev  
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M

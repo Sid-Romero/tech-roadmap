@@ -1,0 +1,131 @@
+# ===========================================
+# Tech Roadmap Tracker - Docker Compose
+# Development & Production configurations
+# ===========================================
+# Usage:
+#   Development: docker compose up -d
+#   Production:  docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+# ===========================================
+
+services:
+  # ----------------- Backend API -----------------
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: roadmap-api
+    restart: unless-stopped
+    
+    # Environment from .env file (never hardcode secrets!)
+    env_file:
+      - .env
+    
+    # Override specific vars if needed
+    environment:
+      - POSTGRES_HOST=db
+      - DEBUG=${DEBUG:-false}
+    
+    ports:
+      - "${API_PORT:-8000}:8000"
+    
+    depends_on:
+      db:
+        condition: service_healthy
+    
+    networks:
+      - roadmap-network
+    
+    # Resource limits (adjust for your server)
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # ----------------- PostgreSQL Database -----------------
+  db:
+    image: postgres:16-alpine
+    container_name: roadmap-db
+    restart: unless-stopped
+    
+    # Use variables from .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      # Security hardening
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
+    
+    volumes:
+      # Persistent data
+      - postgres_data:/var/lib/postgresql/data
+      # Custom init scripts (optional)
+      # - ./init-scripts:/docker-entrypoint-initdb.d
+    
+    ports:
+      # Only expose in development - remove in production!
+      - "${DB_PORT:-5432}:5432"
+    
+    networks:
+      - roadmap-network
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+    
+    # Health check
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ----------------- Redis Cache (Phase 2) -----------------
+  # Uncomment when ready for caching
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: roadmap-redis
+  #   restart: unless-stopped
+  #   command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-changeme}
+  #   volumes:
+  #     - redis_data:/data
+  #   ports:
+  #     - "6379:6379"
+  #   networks:
+  #     - roadmap-network
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "ping"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+
+# ----------------- Volumes -----------------
+volumes:
+  postgres_data:
+    driver: local
+  # redis_data:
+  #   driver: local
+
+# ----------------- Networks -----------------
+networks:
+  roadmap-network:
+    driver: bridge
+    # Optional: specify subnet
+    # ipam:
+    #   config:
+    #     - subnet: 172.20.0.0/16
