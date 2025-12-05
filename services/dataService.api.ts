@@ -6,6 +6,25 @@
 import { INITIAL_DATASET } from '../constants';
 import { Project, WorkSession, UserProfile } from '../types';
 
+// Default profile for new users / fallback
+const DEFAULT_PROFILE: UserProfile = {
+  xp: 0,
+  level: 1,
+  unlockedBadges: [],
+  isPublic: true,
+  showInProgress: true,
+  showPersonalCV: false,
+  showGeneratedCV: true,
+  cvConfig: {
+    displayName: 'John Doe',
+    jobTitle: 'Full Stack Developer',
+    bio: 'Passionate developer building scalable systems.',
+    excludedProjectIds: [],
+    contactEmail: '',
+    contactGithub: ''
+  }
+};
+
 // ----------------- Configuration -----------------
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
 
@@ -323,19 +342,24 @@ export const dataService = {
     if (!isAuthenticated() && USE_LOCAL_FALLBACK) {
       try {
         const stored = localStorage.getItem(PROFILE_STORAGE_KEY);
-        if (stored) return JSON.parse(stored);
-        return { xp: 0, level: 1, unlockedBadges: [] };
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          // Merge with default to ensure all fields exist
+          return { ...DEFAULT_PROFILE, ...parsed };
+        }
+        return DEFAULT_PROFILE;
       } catch (e) {
-        return { xp: 0, level: 1, unlockedBadges: [] };
+        return DEFAULT_PROFILE;
       }
     }
 
     try {
       const profile = await apiRequest<UserProfile>('/profile');
-      return profile;
+      // merge with defaualt in case the API is missing fields
+      return { ...DEFAULT_PROFILE, ...profile };
     } catch (e) {
       console.error('Failed to fetch profile:', e);
-      return { xp: 0, level: 1, unlockedBadges: [] };
+      return DEFAULT_PROFILE;
     }
   },
 
@@ -352,13 +376,20 @@ export const dataService = {
         xp: updates.xp,
         level: updates.level,
         unlockedBadges: updates.unlockedBadges,
+        avatarUrl: updates.avatarUrl,
+        bannerUrl: updates.bannerUrl,
+        isPublic: updates.isPublic,
+        showInProgress: updates.showInProgress,
+        showPersonalCV: updates.showPersonalCV,
+        showGeneratedCV: updates.showGeneratedCV,
+        cvConfig: updates.cvConfig,
       };
 
       const profile = await apiRequest<UserProfile>('/profile', {
         method: 'PUT',
         body: JSON.stringify(payload),
       });
-      return profile;
+      return { ...DEFAULT_PROFILE, ...profile };
     } catch (e) {
       console.error('Failed to update profile:', e);
       throw e;

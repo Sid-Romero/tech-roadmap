@@ -11,9 +11,8 @@ import TimeStation from './components/TimeStation';
 import LevelUpModal from './components/LevelUpModal';
 import RewardModal from './components/RewardModal';
 import ProfilePanel from './components/ProfilePanel';
-import { Trophy, Eye, EyeOff, Layout, Network, RefreshCw, Table, Plus, Play, Pause, Square, Hourglass, User, LogOut, Loader } from './components/Icons.api';
-
-// ===========================================
+import LandingPage from './components/LandingPage';
+import { Trophy, Eye, EyeOff, Layout, Network, Table, Plus, Play, Pause, Square, Hourglass, User, ArrowLeft, RefreshCw, LogOut, Loader } from './components/Icons.api';// ===========================================
 // AUTH COMPONENT
 // ===========================================
 interface AuthScreenProps {
@@ -172,6 +171,7 @@ function App() {
   // Auth State
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showAuthScreen, setShowAuthScreen] = useState(false);
 
   // App State
   const [projects, setProjects] = useState<Project[]>([]);
@@ -179,7 +179,7 @@ function App() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPortfolioMode, setIsPortfolioMode] = useState(false);
-  const [viewMode, setViewMode] = useState<'graph' | 'grid' | 'table' | 'time' | 'profile'>('graph');
+  const [viewMode, setViewMode] = useState<'graph' | 'grid' | 'table' | 'time' | 'profile' | 'public-preview'>('profile');
 
   // Gamification Modal States
   const [showLevelUp, setShowLevelUp] = useState(false);
@@ -368,6 +368,17 @@ function App() {
     }
   };
 
+  // PROFILE HANDLERS (ASYNC)
+  // ===========================================
+  const handleUpdateProfile = async (updates: Partial<UserProfile>) => {
+    try {
+      const newProfile = await dataService.updateProfile(updates);
+      setUserProfile(newProfile);
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+    }
+  };
+
   // ===========================================
   // PROJECT HANDLERS (ASYNC)
   // ===========================================
@@ -505,7 +516,25 @@ function App() {
           onUpdateSettings={handleUpdateTimerSettings}
         />;
       case 'profile':
-        return <ProfilePanel stats={stats} currentRank={currentRank} unlockedBadges={userProfile.unlockedBadges} />;
+        return <ProfilePanel
+          stats={stats}
+          currentRank={currentRank}
+          unlockedBadges={userProfile.unlockedBadges}
+          projects={projects}
+          userProfile={userProfile}
+          onUpdateProfile={handleUpdateProfile}
+          onPreview={() => setViewMode('public-preview')}
+        />;
+      case 'public-preview':
+        return <ProfilePanel
+          stats={stats}
+          currentRank={currentRank}
+          unlockedBadges={userProfile.unlockedBadges}
+          projects={projects}
+          userProfile={userProfile}
+          onUpdateProfile={handleUpdateProfile}
+          readOnly={true}
+        />;
       default:
         return null;
     }
@@ -520,9 +549,14 @@ function App() {
     return <LoadingScreen />;
   }
 
-  // Show auth screen if not logged in
+  // Show auth screen or landing page if not logged in
   if (!isAuthenticated) {
-    return <AuthScreen onAuthSuccess={handleAuthSuccess} />;
+    // Show auth screen if not logged in
+    if (showAuthScreen)
+    {
+      return <AuthScreen onAuthSuccess={handleAuthSuccess} />;
+    }
+  return <LandingPage onLogin={() => setShowAuthScreen(true)} />;
   }
 
   // ===========================================
@@ -533,63 +567,81 @@ function App() {
 
       {/* Navbar / HUD */}
       <header className="h-16 border-b border-slate-200 bg-white/80 backdrop-blur flex items-center justify-between px-6 z-40 shrink-0 shadow-sm">
-        <div className="flex items-center gap-4">
-          <div className="w-8 h-8 bg-ocean-900 rounded-lg flex items-center justify-center font-bold text-white shadow-lg shadow-ocean-900/20">
-            TR
-          </div>
-          <h1 className="font-bold text-lg hidden md:block tracking-tight text-slate-800">Tech Roadmap</h1>
-
-          {/* XP Bar */}
-          <div className="hidden md:flex items-center gap-3 bg-slate-50 rounded-full px-4 py-1.5 border border-slate-200 ml-4 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => setViewMode('profile')}>
-            <Trophy size={16} className="text-yellow-500" />
-            <div className="flex flex-col leading-none">
-              <span className="text-xs font-bold text-slate-900">Lvl {stats.level}</span>
-              <span className="text-xs text-slate-500 font-semibold uppercase">{currentRank.title}</span>
-            </div>
-            <div className="w-32 h-2.5 bg-slate-200 rounded-full overflow-hidden ml-2 relative">
-              <div
-                className="h-full bg-gradient-to-r from-yellow-400 to-yellow-600 transition-all duration-500"
-                style={{ width: `${Math.min(100, (stats.xp / (stats.nextLevelXP * 1.5)) * 100)}%` }}
-              ></div>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          {/* View Toggles */}
-          <div className="flex bg-slate-100 rounded-lg p-1 border border-slate-200">
-            <button onClick={() => setViewMode('graph')} className={`p-1.5 rounded transition-all ${viewMode === 'graph' ? 'bg-white text-ocean-600 shadow-sm' : 'text-slate-400'}`} title="Graph"><Network size={18}/></button>
-            <button onClick={() => setViewMode('table')} className={`p-1.5 rounded transition-all ${viewMode === 'table' ? 'bg-white text-ocean-600 shadow-sm' : 'text-slate-400'}`} title="Table"><Table size={18}/></button>
-            <button onClick={() => setViewMode('grid')} className={`p-1.5 rounded transition-all ${viewMode === 'grid' ? 'bg-white text-ocean-600 shadow-sm' : 'text-slate-400'}`} title="Portfolio"><Layout size={18}/></button>
-            <button onClick={() => setViewMode('time')} className={`p-1.5 rounded transition-all ${viewMode === 'time' ? 'bg-white text-ocean-600 shadow-sm' : 'text-slate-400'}`} title="Time Station"><Hourglass size={18}/></button>
-            <button onClick={() => setViewMode('profile')} className={`p-1.5 rounded transition-all ${viewMode === 'profile' ? 'bg-white text-ocean-600 shadow-sm' : 'text-slate-400'}`} title="Profile"><User size={18}/></button>
-          </div>
-
-          <div className="h-6 w-px bg-slate-200 mx-2"></div>
-
-          {/* CRUD Actions */}
-          {!isPortfolioMode && (
-            <button onClick={handleAddProject} className="flex items-center gap-2 px-3 py-1.5 bg-ocean-900 text-white font-medium rounded-lg text-sm hover:bg-ocean-800 transition-all shadow-md">
-              <Plus size={16} /> <span className="hidden sm:inline">New Node</span>
+        {viewMode === 'public-preview' ? (
+          // simplified header for public preview
+          <div className="flex items-center gap-4 w-full justify-between">
+            <span className="bg-ocean-100 text-ocean-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider animate-pulse border border-ocean-200">
+              Viewing Public Preview
+            </span>
+            <button
+              onClick={() => setViewMode('profile')}
+              className="flex items-center gap-2 px-4 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition-colors font-bold shadow-md"
+            >
+              <ArrowLeft size={18} /> Back to Dashboard
             </button>
-          )}
+          </div>
+        ) : (
+          // normal header
+          <>
+            <div className="flex items-center gap-4">
+              <div className="w-8 h-8 bg-ocean-900 rounded-lg flex items-center justify-center font-bold text-white shadow-lg shadow-ocean-900/20">
+                TR
+              </div>
+              <h1 className="font-bold text-lg hidden md:block tracking-tight text-slate-800">Tech Roadmap</h1>
 
-          <button onClick={togglePortfolioMode} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm font-medium transition-all ${isPortfolioMode ? 'bg-purple-50 border-purple-200 text-purple-700' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
-            {isPortfolioMode ? <Eye size={16} /> : <EyeOff size={16} />}
-            <span className="hidden sm:inline">{isPortfolioMode ? 'Public View' : 'Editor'}</span>
-          </button>
+              {/* XP Bar */}
+              <div className="hidden md:flex items-center gap-3 bg-slate-50 rounded-full px-4 py-1.5 border border-slate-200 ml-4 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => setViewMode('profile')}>
+                <Trophy size={16} className="text-yellow-500" />
+                <div className="flex flex-col leading-none">
+                  <span className="text-xs font-bold text-slate-900">Lvl {stats.level}</span>
+                  <span className="text-xs text-slate-500 font-semibold uppercase">{currentRank.title}</span>
+                </div>
+                <div className="w-32 h-2.5 bg-slate-200 rounded-full overflow-hidden ml-2 relative">
+                  <div
+                    className="h-full bg-gradient-to-r from-yellow-400 to-yellow-600 transition-all duration-500"
+                    style={{ width: `${Math.min(100, (stats.xp / (stats.nextLevelXP * 1.5)) * 100)}%` }}
+                  ></div>
+                </div>
+              </div>
+            </div>
 
-          {!isPortfolioMode && (
-            <button onClick={handleReset} className="p-2 text-slate-400 hover:text-red-500 transition-colors" title="Reset Data">
-              <RefreshCw size={16} />
-            </button>
-          )}
+            <div className="flex items-center gap-3">
+              {/* View Toggles */}
+              <div className="flex bg-slate-100 rounded-lg p-1 border border-slate-200">
+                <button onClick={() => setViewMode('graph')} className={`p-1.5 rounded transition-all ${viewMode === 'graph' ? 'bg-white text-ocean-600 shadow-sm' : 'text-slate-400'}`} title="Graph"><Network size={18}/></button>
+                <button onClick={() => setViewMode('table')} className={`p-1.5 rounded transition-all ${viewMode === 'table' ? 'bg-white text-ocean-600 shadow-sm' : 'text-slate-400'}`} title="Table"><Table size={18}/></button>
+                <button onClick={() => setViewMode('grid')} className={`p-1.5 rounded transition-all ${viewMode === 'grid' ? 'bg-white text-ocean-600 shadow-sm' : 'text-slate-400'}`} title="Portfolio"><Layout size={18}/></button>
+                <button onClick={() => setViewMode('time')} className={`p-1.5 rounded transition-all ${viewMode === 'time' ? 'bg-white text-ocean-600 shadow-sm' : 'text-slate-400'}`} title="Time Station"><Hourglass size={18}/></button>
+                <button onClick={() => setViewMode('profile')} className={`p-1.5 rounded transition-all ${viewMode === 'profile' ? 'bg-white text-ocean-600 shadow-sm' : 'text-slate-400'}`} title="Profile"><User size={18}/></button>
+              </div>
 
-          {/* Logout Button */}
-          <button onClick={handleLogout} className="p-2 text-slate-400 hover:text-slate-600 transition-colors" title="Logout">
-            <LogOut size={16} />
-          </button>
-        </div>
+              <div className="h-6 w-px bg-slate-200 mx-2"></div>
+
+              {/* CRUD Actions */}
+              {!isPortfolioMode && (
+                <button onClick={handleAddProject} className="flex items-center gap-2 px-3 py-1.5 bg-ocean-900 text-white font-medium rounded-lg text-sm hover:bg-ocean-800 transition-all shadow-md">
+                  <Plus size={16} /> <span className="hidden sm:inline">New Node</span>
+                </button>
+              )}
+
+              <button onClick={togglePortfolioMode} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm font-medium transition-all ${isPortfolioMode ? 'bg-purple-50 border-purple-200 text-purple-700' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
+                {isPortfolioMode ? <Eye size={16} /> : <EyeOff size={16} />}
+                <span className="hidden sm:inline">{isPortfolioMode ? 'Public View' : 'Editor'}</span>
+              </button>
+
+              {!isPortfolioMode && (
+                <button onClick={handleReset} className="p-2 text-slate-400 hover:text-red-500 transition-colors" title="Reset Data">
+                  <RefreshCw size={16} />
+                </button>
+              )}
+
+              {/* Logout Button */}
+              <button onClick={handleLogout} className="p-2 text-slate-400 hover:text-slate-600 transition-colors" title="Logout">
+                <LogOut size={16} />
+              </button>
+            </div>
+          </>
+        )}
       </header>
 
       {/* Main Content Area */}
@@ -645,7 +697,7 @@ function App() {
         allProjects={projects}
         onSave={handleSaveProject}
         onDelete={handleDeleteProject}
-        readOnly={isPortfolioMode}
+        readOnly={isPortfolioMode || viewMode === 'public-preview'}
         globalTimerState={timerState}
         onTimerStart={handleTimerStart}
         onTimerPause={handleTimerPause}

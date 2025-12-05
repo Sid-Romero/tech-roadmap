@@ -40,7 +40,7 @@ export interface Project {
   dependencies: string[]; // Array of project IDs
   description: string;
   tech_stack: string[];
-  
+
   // Deep Detail Fields
   complexity?: number; // 1-5
   priority?: 'low' | 'medium' | 'high';
@@ -73,10 +73,30 @@ export interface Badge {
   threshold: number;
 }
 
+export interface CVConfig {
+  displayName?: string;
+  jobTitle?: string;
+  bio?: string;
+  excludedProjectIds: string[];
+  contactEmail?: string;
+  contactGithub?: string;
+}
+
 export interface UserProfile {
   xp: number;
   level: number;
   unlockedBadges: string[]; // IDs of badges
+  avatarUrl?: string; // Base64 image
+  bannerUrl?: string; // Base64 image
+
+  // Privacy & Portfolio Settings
+  isPublic?: boolean;
+  showInProgress?: boolean;
+  showPersonalCV?: boolean;
+  showGeneratedCV?: boolean;
+
+  // CV Data
+  cvConfig?: CVConfig;
 }
 
 export interface UserStats {
