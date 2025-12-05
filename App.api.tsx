@@ -489,7 +489,7 @@ function App() {
   const renderContent = () => {
     switch (viewMode) {
       case 'graph':
-        return <RoadmapGraph projects={projects} onNodeClick={handleProjectClick} isPortfolioMode={isPortfolioMode} />;
+        return <RoadmapGraph projects={projects} onNodeClick={handleProjectClick} onProjectUpdate={handleSaveProject} isPortfolioMode={isPortfolioMode} />;
       case 'grid':
         return <div className="h-full overflow-y-auto"><PortfolioGrid projects={projects} onProjectClick={handleProjectClick} userStats={stats} /></div>;
       case 'table':

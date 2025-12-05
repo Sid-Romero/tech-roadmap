@@ -39,3 +39,5 @@ logs/
 # Test
 coverage/
 .pytest_cache/
+phase2/
+
