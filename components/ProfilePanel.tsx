@@ -225,6 +225,46 @@ const ProfilePanel: React.FC<ProfilePanelProps> = ({
 
       <div className="max-w-6xl mx-auto px-6 mt-8 space-y-12">
 
+        {/* Search Bar - Prominent at top */}
+        {!readOnly && onViewPublicProfile && (
+            <section className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6">
+                <div className="text-center mb-6">
+                    <h3 className="text-xl font-bold text-slate-900 mb-1">Find Other Developers</h3>
+                    <p className="text-slate-500 text-sm">Search for public profiles by username</p>
+                </div>
+                <div className="flex gap-3 max-w-2xl mx-auto">
+                    <div className="flex-1 relative">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                        <input
+                            type="text"
+                            value={searchUsername}
+                            onChange={(e) => setSearchUsername(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' && searchUsername.trim()) {
+                                    onViewPublicProfile(searchUsername.trim());
+                                    setSearchUsername('');
+                                }
+                            }}
+                            placeholder="Enter a username..."
+                            className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-ocean-500 focus:border-transparent focus:bg-white text-base transition-all"
+                        />
+                    </div>
+                    <button
+                        onClick={() => {
+                            if (searchUsername.trim()) {
+                                onViewPublicProfile(searchUsername.trim());
+                                setSearchUsername('');
+                            }
+                        }}
+                        disabled={!searchUsername.trim()}
+                        className="px-8 py-4 bg-slate-900 text-white rounded-xl hover:bg-slate-800 disabled:bg-slate-300 disabled:cursor-not-allowed transition-all text-sm font-bold uppercase tracking-wide"
+                    >
+                        Search
+                    </button>
+                </div>
+            </section>
+        )}
+
         {/* Badges Collection */}
         <section>
             <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
@@ -365,49 +405,6 @@ const ProfilePanel: React.FC<ProfilePanelProps> = ({
                          </div>
                      </div>
                  </div>
-            </section>
-        )}
-
-        {/* Find Other Users - Hidden in Read Only Mode */}
-        {!readOnly && onViewPublicProfile && (
-            <section className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-                <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center gap-2">
-                    <Users className="text-slate-600" size={20}/>
-                    <h3 className="text-lg font-bold text-slate-900">Find Other Users</h3>
-                </div>
-                <div className="p-6">
-                    <p className="text-sm text-slate-600 mb-4">Search for public profiles by username</p>
-                    <div className="flex gap-2">
-                        <div className="flex-1 relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-                            <input
-                                type="text"
-                                value={searchUsername}
-                                onChange={(e) => setSearchUsername(e.target.value)}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter' && searchUsername.trim()) {
-                                        onViewPublicProfile(searchUsername.trim());
-                                        setSearchUsername('');
-                                    }
-                                }}
-                                placeholder="Enter username..."
-                                className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-ocean-500 focus:border-transparent text-sm"
-                            />
-                        </div>
-                        <button
-                            onClick={() => {
-                                if (searchUsername.trim()) {
-                                    onViewPublicProfile(searchUsername.trim());
-                                    setSearchUsername('');
-                                }
-                            }}
-                            disabled={!searchUsername.trim()}
-                            className="px-6 py-2.5 bg-ocean-600 text-white rounded-lg hover:bg-ocean-700 disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors text-sm font-medium"
-                        >
-                            Search
-                        </button>
-                    </div>
-                </div>
             </section>
         )}
 
