@@ -60,7 +60,7 @@ async def authenticate_user(
     user = await get_user_by_username(db, username)
     if not user:
         user = await get_user_by_email(db, username)
-    
+
     if not user:
         return None
     if not verify_password(password, user.hashed_password):
@@ -72,14 +72,14 @@ async def create_user(db: AsyncSession, user_data: UserCreate) -> User:
     """Create new user with profile."""
     user_id = generate_id()
     profile_id = generate_id()
-    
+
     user = User(
         id=user_id,
         email=user_data.email.lower(),
         username=user_data.username.lower(),
         hashed_password=get_password_hash(user_data.password)
     )
-    
+
     profile = UserProfile(
         id=profile_id,
         user_id=user_id,
@@ -87,11 +87,11 @@ async def create_user(db: AsyncSession, user_data: UserCreate) -> User:
         level=1,
         unlocked_badges=[]
     )
-    
+
     db.add(user)
     db.add(profile)
     await db.flush()
-    
+
     return user
 
 
@@ -119,11 +119,11 @@ async def update_profile(
     profile = await get_profile_by_user_id(db, user_id)
     if not profile:
         return None
-    
+
     update_data = profile_data.model_dump(exclude_unset=True)
     for field, value in update_data.items():
         setattr(profile, field, value)
-    
+
     await db.flush()
     return profile
 
@@ -133,7 +133,7 @@ async def add_xp(db: AsyncSession, user_id: str, amount: int) -> Optional[UserPr
     profile = await get_profile_by_user_id(db, user_id)
     if not profile:
         return None
-    
+
     profile.xp += amount
     await db.flush()
     return profile
@@ -178,7 +178,7 @@ async def create_project(
 ) -> Project:
     """Create new project."""
     project_id = project_data.id or f"custom_{generate_id()[:8]}"
-    
+
     project = Project(
         id=project_id,
         user_id=user_id,
@@ -195,14 +195,17 @@ async def create_project(
         checklist=[],
         resources=[]
     )
-    
+
     db.add(project)
     await db.flush()
-    
+
     # Check dependencies after creation
     await check_project_dependencies(db, user_id)
-    
-    return project
+
+    # Refresh to get all attributes including timestamps
+    await db.refresh(project)
+    # Reload with sessions
+    return await get_project_by_id(db, project_id, user_id)
 
 
 async def update_project(
@@ -215,39 +218,40 @@ async def update_project(
     project = await get_project_by_id(db, project_id, user_id)
     if not project:
         return None
-    
+
     update_data = project_data.model_dump(exclude_unset=True, by_alias=False)
-    
+
     # Handle nested objects
     if "position" in update_data and update_data["position"]:
         update_data["position"] = update_data["position"].model_dump() if hasattr(update_data["position"], "model_dump") else update_data["position"]
-    
+
     if "checklist" in update_data and update_data["checklist"]:
         update_data["checklist"] = [
-            item.model_dump() if hasattr(item, "model_dump") else item 
+            item.model_dump() if hasattr(item, "model_dump") else item
             for item in update_data["checklist"]
         ]
-    
+
     if "resources" in update_data and update_data["resources"]:
         update_data["resources"] = [
-            item.model_dump() if hasattr(item, "model_dump") else item 
+            item.model_dump() if hasattr(item, "model_dump") else item
             for item in update_data["resources"]
         ]
-    
+
     # Recalculate time from sessions if sessions exist
     if project.sessions:
         total_seconds = sum(s.duration_seconds for s in project.sessions)
         update_data["time_spent_hours"] = round(total_seconds / 3600, 1)
-    
+
     for field, value in update_data.items():
         setattr(project, field, value)
-    
+
     await db.flush()
-    
+
     # Check dependencies after update
     await check_project_dependencies(db, user_id)
-    
-    return project
+
+    # Reload project with sessions to ensure all attributes are loaded
+    return await get_project_by_id(db, project_id, user_id)
 
 
 async def delete_project(
@@ -259,7 +263,7 @@ async def delete_project(
     project = await get_project_by_id(db, project_id, user_id)
     if not project:
         return False
-    
+
     # Remove from other projects' dependencies
     await db.execute(
         update(Project)
@@ -268,19 +272,19 @@ async def delete_project(
             dependencies=Project.dependencies  # This will be handled in Python
         )
     )
-    
+
     # Actually need to handle JSON array update - do it manually
     all_projects = await get_projects_by_user(db, user_id)
     for p in all_projects:
         if project_id in p.dependencies:
             p.dependencies = [d for d in p.dependencies if d != project_id]
-    
+
     await db.delete(project)
     await db.flush()
-    
+
     # Recheck dependencies
     await check_project_dependencies(db, user_id)
-    
+
     return True
 
 
@@ -291,18 +295,18 @@ async def check_project_dependencies(db: AsyncSession, user_id: str) -> None:
     """
     projects = await get_projects_by_user(db, user_id)
     completed_ids = {p.id for p in projects if p.status == ProjectStatus.DONE}
-    
+
     for project in projects:
         if project.status in [ProjectStatus.DONE, ProjectStatus.IN_PROGRESS]:
             continue
-        
+
         all_deps_met = all(dep_id in completed_ids for dep_id in project.dependencies)
-        
+
         if all_deps_met and project.status == ProjectStatus.LOCKED:
             project.status = ProjectStatus.UNLOCKED
         elif not all_deps_met and project.status == ProjectStatus.UNLOCKED:
             project.status = ProjectStatus.LOCKED
-    
+
     await db.flush()
 
 
@@ -320,7 +324,7 @@ async def add_session_to_project(
     project = await get_project_by_id(db, project_id, user_id)
     if not project:
         return None
-    
+
     session = WorkSession(
         id=generate_id(),
         project_id=project_id,
@@ -331,14 +335,14 @@ async def add_session_to_project(
         notes=session_data.notes,
         task_id=session_data.task_id
     )
-    
+
     db.add(session)
     await db.flush()
-    
+
     # Update project time
     total_seconds = sum(s.duration_seconds for s in project.sessions) + session_data.duration_seconds
     project.time_spent_hours = round(total_seconds / 3600, 1)
-    
+
     await db.flush()
     return session
 
@@ -352,7 +356,7 @@ async def get_sessions_by_project(
     project = await get_project_by_id(db, project_id, user_id)
     if not project:
         return []
-    
+
     result = await db.execute(
         select(WorkSession)
         .where(WorkSession.project_id == project_id)
@@ -368,7 +372,7 @@ async def get_sessions_by_project(
 async def seed_initial_projects(db: AsyncSession, user_id: str) -> List[Project]:
     """Seed initial projects from constants for new user."""
     from app.constants import INITIAL_DATASET
-    
+
     projects = []
     for project_data in INITIAL_DATASET:
         project = Project(
@@ -390,6 +394,6 @@ async def seed_initial_projects(db: AsyncSession, user_id: str) -> List[Project]
         )
         db.add(project)
         projects.append(project)
-    
+
     await db.flush()
     return projects

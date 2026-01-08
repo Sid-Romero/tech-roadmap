@@ -104,7 +104,7 @@ const GraphNode: React.FC<GraphNodeProps> = ({
         </h3>
 
         <div className="flex gap-1 justify-center mt-1 flex-wrap pointer-events-none">
-          {project.tech_stack.slice(0, 2).map(t => (
+          {(project.tech_stack || []).slice(0, 2).map(t => (
             <span key={t} className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-500 font-medium">
               {t}
             </span>

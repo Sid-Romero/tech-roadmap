@@ -241,7 +241,7 @@ const CVModal: React.FC<CVModalProps> = ({ isOpen, onClose, projects, userProfil
                                      <span className="text-xs font-mono text-slate-500">{project.time_spent_hours || 0}h Focus</span>
                                  </div>
                                  <div className="flex gap-2 mb-2 text-xs text-ocean-600 font-medium">
-                                     {project.category} • {project.tech_stack.slice(0, 5).join(', ')}
+                                     {project.category} • {(project.tech_stack || []).slice(0, 5).join(', ')}
                                  </div>
                                  <p className="text-sm text-slate-700 leading-relaxed">
                                      {project.description}

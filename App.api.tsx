@@ -532,6 +532,7 @@ function App() {
           userProfile={userProfile}
           onUpdateProfile={handleUpdateProfile}
           onPreview={() => setViewMode('public-preview')}
+          onProjectClick={handleProjectClick}
         />;
       case 'public-preview':
         return <ProfilePanel
@@ -542,6 +543,7 @@ function App() {
           userProfile={userProfile}
           onUpdateProfile={handleUpdateProfile}
           readOnly={true}
+          onProjectClick={handleProjectClick}
         />;
       default:
         return null;

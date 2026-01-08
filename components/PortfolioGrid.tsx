@@ -113,12 +113,12 @@ const PortfolioGrid: React.FC<PortfolioGridProps> = ({ projects, onProjectClick,
                 </p>
 
                 <div className="flex flex-wrap gap-2 mb-6">
-                  {project.tech_stack.slice(0, 4).map(t => (
+                  {(project.tech_stack || []).slice(0, 4).map(t => (
                     <span key={t} className="text-xs bg-slate-50 border border-slate-100 px-2 py-1 rounded text-slate-600 font-medium">
                         {t}
                     </span>
                   ))}
-                  {project.tech_stack.length > 4 && <span className="text-xs text-slate-400 self-center">+{project.tech_stack.length - 4}</span>}
+                  {(project.tech_stack || []).length > 4 && <span className="text-xs text-slate-400 self-center">+{(project.tech_stack || []).length - 4}</span>}
                 </div>
 
                 <div className="flex justify-between items-center text-slate-500 text-sm border-t border-slate-100 pt-4 mt-auto">

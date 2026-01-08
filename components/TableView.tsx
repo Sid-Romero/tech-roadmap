@@ -77,13 +77,13 @@ const TableView: React.FC<TableViewProps> = ({ projects, onProjectClick, onStatu
                          </td>
                          <td className="px-6 py-4">
                            <div className="flex flex-wrap gap-1">
-                             {project.tech_stack.slice(0, 3).map(t => (
+                             {(project.tech_stack || []).slice(0, 3).map(t => (
                                <span key={t} className="px-1.5 py-0.5 rounded bg-white border border-slate-200 text-[10px] text-slate-600 font-medium">
                                  {t}
                                </span>
                              ))}
-                             {project.tech_stack.length > 3 && (
-                               <span className="px-1.5 py-0.5 text-[10px] text-slate-400">+{project.tech_stack.length - 3}</span>
+                             {(project.tech_stack || []).length > 3 && (
+                               <span className="px-1.5 py-0.5 text-[10px] text-slate-400">+{(project.tech_stack || []).length - 3}</span>
                              )}
                            </div>
                          </td>

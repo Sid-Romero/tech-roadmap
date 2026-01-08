@@ -14,10 +14,11 @@ interface ProfilePanelProps {
   onUpdateProfile: (updates: Partial<UserProfile>) => void;
   readOnly?: boolean;
   onPreview?: () => void;
+  onProjectClick?: (project: Project) => void;
 }
 
 const ProfilePanel: React.FC<ProfilePanelProps> = ({
-    stats, currentRank, unlockedBadges, projects, userProfile, onUpdateProfile, readOnly = false, onPreview
+    stats, currentRank, unlockedBadges, projects, userProfile, onUpdateProfile, readOnly = false, onPreview, onProjectClick
 }) => {
   // Refs for file inputs
   const bannerInputRef = useRef<HTMLInputElement>(null);
@@ -376,7 +377,11 @@ const ProfilePanel: React.FC<ProfilePanelProps> = ({
             {visibleProjects.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {visibleProjects.map(project => (
-                        <div key={project.id} className="bg-white border border-slate-200 rounded-xl overflow-hidden hover:shadow-lg hover:border-ocean-300 transition-all group">
+                        <div
+                            key={project.id}
+                            onClick={() => onProjectClick?.(project)}
+                            className="bg-white border border-slate-200 rounded-xl overflow-hidden hover:shadow-lg hover:border-ocean-300 transition-all group cursor-pointer"
+                        >
                              <div className={`h-1.5 bg-gradient-to-r ${project.status === 'in_progress' ? 'from-sky-400 to-ocean-500' : 'from-emerald-400 to-ocean-500'}`}></div>
                              <div className="p-5">
                                  <div className="flex justify-between items-start mb-2">
@@ -402,7 +407,7 @@ const ProfilePanel: React.FC<ProfilePanelProps> = ({
                                      {(project.tech_stack || []).slice(0, 3).map(tech => (
                                          <span key={tech} className="text-[10px] bg-slate-50 text-slate-600 px-1.5 py-0.5 rounded border border-slate-100">{tech}</span>
                                      ))}
-                                     {(project.tech_stack || []).length > 3 && <span className="text-[10px] text-slate-400">+{project.tech_stack.length - 3}</span>}
+                                     {(project.tech_stack || []).length > 3 && <span className="text-[10px] text-slate-400">+{(project.tech_stack || []).length - 3}</span>}
                                  </div>
 
                                  <div className="flex items-center justify-between pt-4 border-t border-slate-50">
