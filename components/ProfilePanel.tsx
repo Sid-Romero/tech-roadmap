@@ -135,7 +135,7 @@ const ProfilePanel: React.FC<ProfilePanelProps> = ({
                      </button>
                      {userProfile.bannerUrl && (
                          <button
-                            onClick={() => onUpdateProfile({ bannerUrl: undefined })}
+                            onClick={() => onUpdateProfile({ bannerUrl: null as any })}
                             className="bg-red-500/80 hover:bg-red-600 text-white p-2 rounded-full backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all transform hover:scale-105"
                             title="Remove Banner"
                          >
@@ -173,7 +173,7 @@ const ProfilePanel: React.FC<ProfilePanelProps> = ({
                             </button>
                             {userProfile.avatarUrl && (
                                 <button
-                                    onClick={() => onUpdateProfile({ avatarUrl: undefined })}
+                                    onClick={() => onUpdateProfile({ avatarUrl: null as any })}
                                     className="absolute bottom-2 left-[-8px] z-20 bg-red-500 text-white hover:bg-red-600 p-1.5 rounded-full border border-white shadow-md opacity-0 group-hover:opacity-100 transition-all hover:scale-110"
                                     title="Remove Avatar"
                                 >
