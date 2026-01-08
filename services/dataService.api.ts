@@ -124,12 +124,12 @@ export const dataService = {
 
   async login(username: string, password: string): Promise<boolean> {
     try {
-      const response = await apiRequest<{ access_token: string }>('/auth/login/json', {
+      const response = await apiRequest<{ accessToken: string }>('/auth/login/json', {
         method: 'POST',
         body: JSON.stringify({ username, password }),
         skipAuth: true,
       });
-      setToken(response.access_token);
+      setToken(response.accessToken);
       return true;
     } catch (e) {
       console.error('Login failed:', e);

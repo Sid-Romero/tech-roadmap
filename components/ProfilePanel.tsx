@@ -2,7 +2,7 @@
 import React, { useRef, useState } from 'react';
 import { UserStats, Rank, Project, UserProfile } from '../types';
 import { RANKS, BADGES } from '../constants';
-import { Trophy, Star, Clock, Lock, CheckCircle2, ExternalLink, Pencil, Camera, AlertTriangle, ShieldCheck, Globe, FileText, Zap, Eye, Download } from './Icons.api';
+import { Trophy, Star, Clock, Lock, CheckCircle2, ExternalLink, Pencil, Camera, AlertTriangle, ShieldCheck, Globe, FileText, Zap, Eye, Download, X } from './Icons.api';
 import CVModal from './CVModal';
 
 interface ProfilePanelProps {
@@ -123,15 +123,26 @@ const ProfilePanel: React.FC<ProfilePanelProps> = ({
                  </div>
              )}
 
-             {/* Edit Banner Button */}
+             {/* Edit Banner Buttons */}
              {!readOnly && (
-                 <button
-                    onClick={() => bannerInputRef.current?.click()}
-                    className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all transform hover:scale-105"
-                    title="Change Banner"
-                 >
-                     <Camera size={18} />
-                 </button>
+                 <div className="absolute top-4 right-4 flex gap-2">
+                     <button
+                        onClick={() => bannerInputRef.current?.click()}
+                        className="bg-black/50 hover:bg-black/70 text-white p-2 rounded-full backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all transform hover:scale-105"
+                        title="Change Banner"
+                     >
+                         <Camera size={18} />
+                     </button>
+                     {userProfile.bannerUrl && (
+                         <button
+                            onClick={() => onUpdateProfile({ bannerUrl: undefined })}
+                            className="bg-red-500/80 hover:bg-red-600 text-white p-2 rounded-full backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all transform hover:scale-105"
+                            title="Remove Banner"
+                         >
+                             <X size={18} />
+                         </button>
+                     )}
+                 </div>
              )}
         </div>
 
@@ -150,15 +161,26 @@ const ProfilePanel: React.FC<ProfilePanelProps> = ({
                         <div className="absolute -bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-black/60 to-transparent pointer-events-none"></div>
                     </div>
 
-                    {/* Edit Avatar Button */}
+                    {/* Edit Avatar Buttons */}
                     {!readOnly && (
-                        <button
-                            onClick={() => avatarInputRef.current?.click()}
-                            className="absolute bottom-2 right-[-8px] z-20 bg-white text-slate-700 hover:text-ocean-600 p-1.5 rounded-full border border-slate-200 shadow-md opacity-0 group-hover:opacity-100 transition-all hover:scale-110"
-                            title="Change Avatar"
-                        >
-                            <Pencil size={14} />
-                        </button>
+                        <>
+                            <button
+                                onClick={() => avatarInputRef.current?.click()}
+                                className="absolute bottom-2 right-[-8px] z-20 bg-white text-slate-700 hover:text-ocean-600 p-1.5 rounded-full border border-slate-200 shadow-md opacity-0 group-hover:opacity-100 transition-all hover:scale-110"
+                                title="Change Avatar"
+                            >
+                                <Pencil size={14} />
+                            </button>
+                            {userProfile.avatarUrl && (
+                                <button
+                                    onClick={() => onUpdateProfile({ avatarUrl: undefined })}
+                                    className="absolute bottom-2 left-[-8px] z-20 bg-red-500 text-white hover:bg-red-600 p-1.5 rounded-full border border-white shadow-md opacity-0 group-hover:opacity-100 transition-all hover:scale-110"
+                                    title="Remove Avatar"
+                                >
+                                    <X size={14} />
+                                </button>
+                            )}
+                        </>
                     )}
 
                     <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 z-20 bg-yellow-500 text-slate-900 text-xs font-bold px-3 py-1 rounded-full border border-white shadow-sm flex items-center gap-1 whitespace-nowrap">
@@ -377,10 +399,10 @@ const ProfilePanel: React.FC<ProfilePanelProps> = ({
                                  <p className="text-xs text-slate-500 mb-4 line-clamp-2">{project.description}</p>
 
                                  <div className="flex flex-wrap gap-1 mb-4">
-                                     {project.tech_stack.slice(0, 3).map(tech => (
+                                     {(project.tech_stack || []).slice(0, 3).map(tech => (
                                          <span key={tech} className="text-[10px] bg-slate-50 text-slate-600 px-1.5 py-0.5 rounded border border-slate-100">{tech}</span>
                                      ))}
-                                     {project.tech_stack.length > 3 && <span className="text-[10px] text-slate-400">+{project.tech_stack.length - 3}</span>}
+                                     {(project.tech_stack || []).length > 3 && <span className="text-[10px] text-slate-400">+{project.tech_stack.length - 3}</span>}
                                  </div>
 
                                  <div className="flex items-center justify-between pt-4 border-t border-slate-50">

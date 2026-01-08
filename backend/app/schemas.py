@@ -40,7 +40,7 @@ class SubTask(BaseModel):
     id: str
     text: str
     isCompleted: bool = Field(alias="is_completed", default=False)
-    
+
     class Config:
         populate_by_name = True
 
@@ -70,7 +70,7 @@ class WorkSessionBase(BaseModel):
     type: SessionType
     notes: Optional[str] = None
     task_id: Optional[str] = Field(None, alias="taskId")
-    
+
     class Config:
         populate_by_name = True
 
@@ -81,7 +81,7 @@ class WorkSessionCreate(WorkSessionBase):
 
 class WorkSessionResponse(WorkSessionBase):
     id: str
-    
+
     class Config:
         from_attributes = True
         populate_by_name = True
@@ -98,7 +98,7 @@ class ProjectBase(BaseModel):
     tech_stack: List[str] = Field(default=[], alias="techStack")
     complexity: Optional[int] = Field(None, ge=1, le=5)
     priority: Optional[Priority] = Priority.MEDIUM
-    
+
     class Config:
         populate_by_name = True
 
@@ -126,7 +126,7 @@ class ProjectUpdate(BaseModel):
     notes: Optional[str] = None
     time_spent_hours: Optional[float] = Field(None, alias="timeSpentHours", ge=0)
     completed_at: Optional[str] = Field(None, alias="completedAt")
-    
+
     class Config:
         populate_by_name = True
 
@@ -144,7 +144,7 @@ class ProjectResponse(ProjectBase):
     completed_at: Optional[str] = Field(None, alias="completedAt")
     created_at: Optional[datetime] = Field(None, alias="createdAt")
     updated_at: Optional[datetime] = Field(None, alias="updatedAt")
-    
+
     class Config:
         from_attributes = True
         populate_by_name = True
@@ -155,7 +155,14 @@ class UserProfileBase(BaseModel):
     xp: int = 0
     level: int = 1
     unlocked_badges: List[str] = Field(default=[], alias="unlockedBadges")
-    
+    avatar_url: Optional[str] = Field(None, alias="avatarUrl")
+    banner_url: Optional[str] = Field(None, alias="bannerUrl")
+    is_public: bool = Field(False, alias="isPublic")
+    show_in_progress: bool = Field(False, alias="showInProgress")
+    show_personal_cv: bool = Field(False, alias="showPersonalCV")
+    show_generated_cv: bool = Field(False, alias="showGeneratedCV")
+    cv_config: Optional[dict] = Field(None, alias="cvConfig")
+
     class Config:
         populate_by_name = True
 
@@ -164,7 +171,14 @@ class UserProfileUpdate(BaseModel):
     xp: Optional[int] = Field(None, ge=0)
     level: Optional[int] = Field(None, ge=1)
     unlocked_badges: Optional[List[str]] = Field(None, alias="unlockedBadges")
-    
+    avatar_url: Optional[str] = Field(None, alias="avatarUrl")
+    banner_url: Optional[str] = Field(None, alias="bannerUrl")
+    is_public: Optional[bool] = Field(None, alias="isPublic")
+    show_in_progress: Optional[bool] = Field(None, alias="showInProgress")
+    show_personal_cv: Optional[bool] = Field(None, alias="showPersonalCV")
+    show_generated_cv: Optional[bool] = Field(None, alias="showGeneratedCV")
+    cv_config: Optional[dict] = Field(None, alias="cvConfig")
+
     class Config:
         populate_by_name = True
 
@@ -172,7 +186,7 @@ class UserProfileUpdate(BaseModel):
 class UserProfileResponse(UserProfileBase):
     id: str
     user_id: str = Field(alias="userId")
-    
+
     class Config:
         from_attributes = True
         populate_by_name = True
@@ -187,7 +201,7 @@ class UserCreate(BaseModel):
     email: EmailStr
     username: str = Field(min_length=3, max_length=100)
     password: str = Field(min_length=8)
-    
+
     @field_validator("username")
     @classmethod
     def username_alphanumeric(cls, v: str) -> str:
@@ -201,7 +215,7 @@ class UserResponse(BaseModel):
     email: str
     username: str
     created_at: datetime = Field(alias="createdAt")
-    
+
     class Config:
         from_attributes = True
         populate_by_name = True
@@ -210,7 +224,7 @@ class UserResponse(BaseModel):
 class Token(BaseModel):
     access_token: str = Field(alias="accessToken")
     token_type: str = Field(default="bearer", alias="tokenType")
-    
+
     class Config:
         populate_by_name = True
 
@@ -234,7 +248,7 @@ class UserStats(BaseModel):
     rank_title: str = Field(alias="rankTitle")
     next_level_xp: int = Field(alias="nextLevelXP")
     current_level_xp: int = Field(alias="currentLevelXP")
-    
+
     class Config:
         populate_by_name = True
 

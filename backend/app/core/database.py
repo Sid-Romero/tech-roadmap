@@ -49,7 +49,7 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """
     FastAPI dependency that provides a database session.
     Automatically handles commit/rollback and cleanup.
-    
+
     Usage:
         @router.get("/items")
         async def get_items(db: AsyncSession = Depends(get_db)):
@@ -71,13 +71,14 @@ async def init_db() -> None:
     """
     Initialize database tables.
     Called on application startup.
-    
+
     Note: In production, use Alembic migrations instead!
     """
     async with engine.begin() as conn:
         # Import models to register them
         from app import models  # noqa: F401
-        await conn.run_sync(Base.metadata.create_all)
+        # Use checkfirst=True to avoid recreating existing tables/enums
+        await conn.run_sync(lambda sync_conn: Base.metadata.create_all(sync_conn, checkfirst=True))
 
 
 async def close_db() -> None:
