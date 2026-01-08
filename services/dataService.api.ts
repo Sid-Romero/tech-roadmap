@@ -396,6 +396,22 @@ export const dataService = {
     }
   },
 
+  async getPublicProfile(username: string): Promise<{ user: { username: string; createdAt: string }; profile: UserProfile } | null> {
+    try {
+      const response = await apiRequest<{ user: { username: string; createdAt: string }; profile: UserProfile }>(
+        `/users/${username}/public`,
+        { skipAuth: true }
+      );
+      return response;
+    } catch (e: any) {
+      if (e?.status === 404) {
+        return null;
+      }
+      console.error('Failed to fetch public profile:', e);
+      throw e;
+    }
+  },
+
   async addXP(amount: number): Promise<UserProfile> {
     if (!isAuthenticated() && USE_LOCAL_FALLBACK) {
       const profile = await this.getProfile();
