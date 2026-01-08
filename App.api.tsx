@@ -12,6 +12,7 @@ import LevelUpModal from './components/LevelUpModal';
 import RewardModal from './components/RewardModal';
 import ProfilePanel from './components/ProfilePanel';
 import LandingPage from './components/LandingPage';
+import PublicProfileViewer from './components/PublicProfileViewer';
 import { Trophy, Eye, EyeOff, Layout, Network, Table, Plus, Play, Pause, Square, Hourglass, User, ArrowLeft, RefreshCw, LogOut, Loader } from './components/Icons.api';// ===========================================
 // AUTH COMPONENT
 // ===========================================
@@ -187,7 +188,8 @@ function App() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPortfolioMode, setIsPortfolioMode] = useState(false);
-  const [viewMode, setViewMode] = useState<'graph' | 'grid' | 'table' | 'time' | 'profile' | 'public-preview'>('profile');
+  const [viewMode, setViewMode] = useState<'graph' | 'grid' | 'table' | 'time' | 'profile' | 'public-preview' | 'public-profile'>('profile');
+  const [viewingUsername, setViewingUsername] = useState<string | null>(null);
 
   // Gamification Modal States
   const [showLevelUp, setShowLevelUp] = useState(false);
@@ -544,6 +546,15 @@ function App() {
           onUpdateProfile={handleUpdateProfile}
           readOnly={true}
           onProjectClick={handleProjectClick}
+        />;
+      case 'public-profile':
+        if (!viewingUsername) return null;
+        return <PublicProfileViewer
+          username={viewingUsername}
+          onBack={() => {
+            setViewMode('profile');
+            setViewingUsername(null);
+          }}
         />;
       default:
         return null;
