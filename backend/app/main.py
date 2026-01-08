@@ -11,7 +11,7 @@ from fastapi.exceptions import RequestValidationError
 
 from app.core.config import settings
 from app.core.database import init_db, close_db
-from app.routes import auth_router, projects_router, profile_router
+from app.routes import auth_router, projects_router, profile_router, users_router
 
 
 # ----------------- Lifespan Events -----------------
@@ -105,6 +105,7 @@ async def general_exception_handler(request: Request, exc: Exception):
 app.include_router(auth_router, prefix=settings.API_V1_PREFIX)
 app.include_router(projects_router, prefix=settings.API_V1_PREFIX)
 app.include_router(profile_router, prefix=settings.API_V1_PREFIX)
+app.include_router(users_router, prefix=f"{settings.API_V1_PREFIX}/users", tags=["Users"])
 
 
 # ----------------- Health Check -----------------

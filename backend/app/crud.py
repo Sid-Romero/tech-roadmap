@@ -139,6 +139,22 @@ async def add_xp(db: AsyncSession, user_id: str, amount: int) -> Optional[UserPr
     return profile
 
 
+async def get_public_profile_by_username(
+    db: AsyncSession,
+    username: str
+) -> Optional[tuple[User, UserProfile]]:
+    """Get public profile by username. Returns None if profile is private."""
+    user = await get_user_by_username(db, username)
+    if not user:
+        return None
+
+    profile = await get_profile_by_user_id(db, user.id)
+    if not profile or not profile.is_public:
+        return None
+
+    return (user, profile)
+
+
 # =============================================
 # PROJECT CRUD
 # =============================================
