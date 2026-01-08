@@ -40,4 +40,5 @@ logs/
 coverage/
 .pytest_cache/
 phase2/
+inst.md
 

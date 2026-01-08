@@ -15,26 +15,26 @@ services:
       dockerfile: Dockerfile
     container_name: roadmap-api
     restart: unless-stopped
-    
+
     # Environment from .env file (never hardcode secrets!)
     env_file:
       - .env
-    
+
     # Override specific vars if needed
     environment:
       - POSTGRES_HOST=db
       - DEBUG=${DEBUG:-false}
-    
+
     ports:
       - "${API_PORT:-8000}:8000"
-    
+
     depends_on:
       db:
         condition: service_healthy
-    
+
     networks:
       - roadmap-network
-    
+
     # Resource limits (adjust for your server)
     deploy:
       resources:
@@ -44,7 +44,7 @@ services:
         reservations:
           cpus: '0.25'
           memory: 128M
-    
+
     # Health check
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
@@ -58,7 +58,7 @@ services:
     image: postgres:16-alpine
     container_name: roadmap-db
     restart: unless-stopped
-    
+
     # Use variables from .env
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
@@ -66,27 +66,27 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       # Security hardening
       POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
-    
+
     volumes:
       # Persistent data
       - postgres_data:/var/lib/postgresql/data
       # Custom init scripts (optional)
       # - ./init-scripts:/docker-entrypoint-initdb.d
-    
+
     ports:
       # Only expose in development - remove in production!
-      - "${DB_PORT:-5432}:5432"
-    
+      - "${DB_PORT:-5433}:5432"
+
     networks:
       - roadmap-network
-    
+
     # Resource limits
     deploy:
       resources:
         limits:
           cpus: '0.5'
           memory: 256M
-    
+
     # Health check
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]

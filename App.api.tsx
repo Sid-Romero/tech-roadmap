@@ -17,9 +17,10 @@ import { Trophy, Eye, EyeOff, Layout, Network, Table, Plus, Play, Pause, Square,
 // ===========================================
 interface AuthScreenProps {
   onAuthSuccess: () => void;
+  onBack: () => void;
 }
 
-function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
+function AuthScreen({ onAuthSuccess, onBack }: AuthScreenProps) {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
@@ -54,6 +55,13 @@ function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
+        <button
+          onClick={onBack}
+          className="mb-6 flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors"
+        >
+          <ArrowLeft size={20} />
+          <span className="text-sm font-medium">Back</span>
+        </button>
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-ocean-900 rounded-2xl flex items-center justify-center font-bold text-white text-2xl shadow-xl shadow-ocean-900/20 mx-auto mb-4">
             TR
@@ -554,7 +562,7 @@ function App() {
     // Show auth screen if not logged in
     if (showAuthScreen)
     {
-      return <AuthScreen onAuthSuccess={handleAuthSuccess} />;
+      return <AuthScreen onAuthSuccess={handleAuthSuccess} onBack={() => setShowAuthScreen(false)} />;
     }
   return <LandingPage onLogin={() => setShowAuthScreen(true)} />;
   }
