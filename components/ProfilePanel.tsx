@@ -2,7 +2,7 @@
 import React, { useRef, useState } from 'react';
 import { UserStats, Rank, Project, UserProfile } from '../types';
 import { RANKS, BADGES } from '../constants';
-import { Trophy, Star, Clock, Lock, CheckCircle2, ExternalLink, Pencil, Camera, AlertTriangle, ShieldCheck, Globe, FileText, Zap, Eye, Download, X } from './Icons.api';
+import { Trophy, Star, Clock, Lock, CheckCircle2, ExternalLink, Pencil, Camera, AlertTriangle, ShieldCheck, Globe, FileText, Zap, Eye, Download, X, Search, Users } from './Icons.api';
 import CVModal from './CVModal';
 
 interface ProfilePanelProps {
@@ -15,16 +15,18 @@ interface ProfilePanelProps {
   readOnly?: boolean;
   onPreview?: () => void;
   onProjectClick?: (project: Project) => void;
+  onViewPublicProfile?: (username: string) => void;
 }
 
 const ProfilePanel: React.FC<ProfilePanelProps> = ({
-    stats, currentRank, unlockedBadges, projects, userProfile, onUpdateProfile, readOnly = false, onPreview, onProjectClick
+    stats, currentRank, unlockedBadges, projects, userProfile, onUpdateProfile, readOnly = false, onPreview, onProjectClick, onViewPublicProfile
 }) => {
   // Refs for file inputs
   const bannerInputRef = useRef<HTMLInputElement>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isCVModalOpen, setIsCVModalOpen] = useState(false);
+  const [searchUsername, setSearchUsername] = useState('');
 
   // Private Profile View
   if (readOnly && !userProfile.isPublic) {
@@ -361,6 +363,49 @@ const ProfilePanel: React.FC<ProfilePanelProps> = ({
                          </div>
                      </div>
                  </div>
+            </section>
+        )}
+
+        {/* Find Other Users - Hidden in Read Only Mode */}
+        {!readOnly && onViewPublicProfile && (
+            <section className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center gap-2">
+                    <Users className="text-slate-600" size={20}/>
+                    <h3 className="text-lg font-bold text-slate-900">Find Other Users</h3>
+                </div>
+                <div className="p-6">
+                    <p className="text-sm text-slate-600 mb-4">Search for public profiles by username</p>
+                    <div className="flex gap-2">
+                        <div className="flex-1 relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                            <input
+                                type="text"
+                                value={searchUsername}
+                                onChange={(e) => setSearchUsername(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && searchUsername.trim()) {
+                                        onViewPublicProfile(searchUsername.trim());
+                                        setSearchUsername('');
+                                    }
+                                }}
+                                placeholder="Enter username..."
+                                className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-ocean-500 focus:border-transparent text-sm"
+                            />
+                        </div>
+                        <button
+                            onClick={() => {
+                                if (searchUsername.trim()) {
+                                    onViewPublicProfile(searchUsername.trim());
+                                    setSearchUsername('');
+                                }
+                            }}
+                            disabled={!searchUsername.trim()}
+                            className="px-6 py-2.5 bg-ocean-600 text-white rounded-lg hover:bg-ocean-700 disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+                        >
+                            Search
+                        </button>
+                    </div>
+                </div>
             </section>
         )}
 

@@ -535,6 +535,10 @@ function App() {
           onUpdateProfile={handleUpdateProfile}
           onPreview={() => setViewMode('public-preview')}
           onProjectClick={handleProjectClick}
+          onViewPublicProfile={(username) => {
+            setViewingUsername(username);
+            setViewMode('public-profile');
+          }}
         />;
       case 'public-preview':
         return <ProfilePanel

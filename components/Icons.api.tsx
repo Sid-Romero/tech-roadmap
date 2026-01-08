@@ -62,7 +62,10 @@ import {
   CheckSquare,
   // Auth & Loading icons
   Loader,
-  LogOut
+  LogOut,
+  // Search & Social icons
+  Search,
+  Users
 } from 'lucide-react';
 
 export {
@@ -127,5 +130,8 @@ export {
   CheckSquare,
   // NEW: Auth & Loading icons
   Loader,
-  LogOut
+  LogOut,
+  // NEW: Search & Social icons
+  Search,
+  Users
 };
