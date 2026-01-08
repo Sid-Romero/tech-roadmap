@@ -192,12 +192,10 @@ const ProfilePanel: React.FC<ProfilePanelProps> = ({
                     </div>
                 </div>
 
-                <div className="flex-1 mb-2 pt-2">
-                    {username && (
-                        <div className="text-sm font-medium text-ocean-600 mb-1">@{username}</div>
-                    )}
-                    <h2 className="text-3xl font-bold text-slate-900">{currentRank.title}</h2>
-                    <div className="text-slate-500 font-medium flex flex-wrap items-center gap-x-4 gap-y-1 mt-1">
+                <div className="flex-1 mb-1 pt-2">
+                    <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 bg-clip-text text-transparent">{username || 'User'}</h2>
+                    <div className="text-sm font-semibold text-slate-500 mt-2">{currentRank.title}</div>
+                    <div className="text-slate-500 font-medium flex flex-wrap items-center gap-x-4 gap-y-1 mt-0">
                         <span className="flex items-center gap-1.5"><Trophy size={14} className="text-ocean-500"/> {stats.xp.toLocaleString()} XP</span>
                         <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
                         <span className="flex items-center gap-1.5"><CheckCircle2 size={14} className="text-emerald-500"/> {stats.completedProjects} Projects</span>
