@@ -159,6 +159,17 @@ export const dataService = {
 
   isAuthenticated,
 
+  async getCurrentUser(): Promise<{ id: string; username: string; email: string; createdAt: string } | null> {
+    if (!isAuthenticated()) return null;
+    try {
+      const user = await apiRequest<{ id: string; username: string; email: string; createdAt: string }>('/auth/me');
+      return user;
+    } catch (e) {
+      console.error('Failed to get current user:', e);
+      return null;
+    }
+  },
+
   // === Projects ===
 
   async getProjects(): Promise<Project[]> {

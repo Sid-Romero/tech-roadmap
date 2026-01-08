@@ -11,6 +11,7 @@ interface ProfilePanelProps {
   unlockedBadges: string[];
   projects: Project[];
   userProfile: UserProfile;
+  username?: string;
   onUpdateProfile: (updates: Partial<UserProfile>) => void;
   readOnly?: boolean;
   onPreview?: () => void;
@@ -19,7 +20,7 @@ interface ProfilePanelProps {
 }
 
 const ProfilePanel: React.FC<ProfilePanelProps> = ({
-    stats, currentRank, unlockedBadges, projects, userProfile, onUpdateProfile, readOnly = false, onPreview, onProjectClick, onViewPublicProfile
+    stats, currentRank, unlockedBadges, projects, userProfile, username, onUpdateProfile, readOnly = false, onPreview, onProjectClick, onViewPublicProfile
 }) => {
   // Refs for file inputs
   const bannerInputRef = useRef<HTMLInputElement>(null);
@@ -192,6 +193,9 @@ const ProfilePanel: React.FC<ProfilePanelProps> = ({
                 </div>
 
                 <div className="flex-1 mb-2 pt-2">
+                    {username && (
+                        <div className="text-sm font-medium text-ocean-600 mb-1">@{username}</div>
+                    )}
                     <h2 className="text-3xl font-bold text-slate-900">{currentRank.title}</h2>
                     <div className="text-slate-500 font-medium flex flex-wrap items-center gap-x-4 gap-y-1 mt-1">
                         <span className="flex items-center gap-1.5"><Trophy size={14} className="text-ocean-500"/> {stats.xp.toLocaleString()} XP</span>

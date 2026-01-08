@@ -185,6 +185,7 @@ function App() {
   // App State
   const [projects, setProjects] = useState<Project[]>([]);
   const [userProfile, setUserProfile] = useState<UserProfile>({ xp: 0, level: 1, unlockedBadges: [] });
+  const [currentUsername, setCurrentUsername] = useState<string>('');
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPortfolioMode, setIsPortfolioMode] = useState(false);
@@ -220,12 +221,16 @@ function App() {
   const loadData = useCallback(async () => {
     try {
       setIsLoading(true);
-      const [projData, profData] = await Promise.all([
+      const [projData, profData, userData] = await Promise.all([
         dataService.getProjects(),
-        dataService.getProfile()
+        dataService.getProfile(),
+        dataService.getCurrentUser()
       ]);
       setProjects(projData);
       setUserProfile(profData);
+      if (userData) {
+        setCurrentUsername(userData.username);
+      }
     } catch (error) {
       console.error('Failed to load data:', error);
       // If auth error, logout
@@ -532,6 +537,7 @@ function App() {
           unlockedBadges={userProfile.unlockedBadges}
           projects={projects}
           userProfile={userProfile}
+          username={currentUsername}
           onUpdateProfile={handleUpdateProfile}
           onPreview={() => setViewMode('public-preview')}
           onProjectClick={handleProjectClick}
@@ -547,6 +553,7 @@ function App() {
           unlockedBadges={userProfile.unlockedBadges}
           projects={projects}
           userProfile={userProfile}
+          username={currentUsername}
           onUpdateProfile={handleUpdateProfile}
           readOnly={true}
           onProjectClick={handleProjectClick}
